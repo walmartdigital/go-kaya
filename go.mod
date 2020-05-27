@@ -10,6 +10,6 @@ require (
 	github.com/onsi/gomega v1.8.1
 	github.com/spf13/pflag v1.0.5
 	go.uber.org/zap v1.15.0
-	k8s.io/apiextensions-apiserver v0.18.2 // indirect
+	k8s.io/apiextensions-apiserver v0.17.2 // indirect
 	sigs.k8s.io/controller-runtime v0.5.4
 )
