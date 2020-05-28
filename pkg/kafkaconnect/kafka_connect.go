@@ -27,6 +27,17 @@ type Status struct {
 	Tasks     []Task          `json:"tasks"`
 }
 
+// GetActiveTasksCount ...
+func (s Status) GetActiveTasksCount() int {
+	count := 0
+	for _, t := range s.Tasks {
+		if t.State == "RUNNING" {
+			count++
+		}
+	}
+	return count
+}
+
 // Task ...
 type Task struct {
 	ID       int    `json:"id"`
