@@ -88,6 +88,42 @@ var _ = Describe("Read from Kafka Connect", func() {
 		Expect(resp.Payload.(kafkaconnect.ConnectorConfig)).To(Equal(kafkaConnectConfig))
 	})
 
+	It("should get a connector status", func() {
+		task := kafkaconnect.Task{
+			ID:       0,
+			State:    "RUNNING",
+			WorkerID: "somenode",
+		}
+
+		status := kafkaconnect.Status{
+			Name: "blah",
+			Connector: kafkaconnect.ConnectorStatus{
+				State:    "RUNNING",
+				WorkerID: "somenode",
+			},
+			Tasks: []kafkaconnect.Task{
+				task,
+			},
+		}
+
+		statusCode := 200
+		responseBody, err := json.Marshal(status)
+
+		_ = err
+
+		fakeHTTPClient.EXPECT().Get("/connectors/logging/status").Return(
+			statusCode,
+			&responseBody,
+			nil,
+		).Times(1)
+
+		resp, err := kafkaConnectClient.Status("logging")
+		Expect(err).To(BeNil())
+		Expect(resp.Result).To(BeIdenticalTo("success"))
+		Expect(resp.Payload.(kafkaconnect.Status)).To(Equal(status))
+		Expect(resp.Payload.(kafkaconnect.Status).GetActiveTasksCount()).To(Equal(1))
+	})
+
 	It("should throw an error because connector name is invalid", func() {
 		resp, err2 := kafkaConnectClient.Read("/$%&")
 		Expect(err2).NotTo(BeNil())
