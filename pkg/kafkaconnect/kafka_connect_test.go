@@ -117,7 +117,7 @@ var _ = Describe("Read from Kafka Connect", func() {
 			nil,
 		).Times(1)
 
-		resp, err := kafkaConnectClient.Status("logging")
+		resp, err := kafkaConnectClient.GetStatus("logging")
 		Expect(err).To(BeNil())
 		Expect(resp.Result).To(BeIdenticalTo("success"))
 		Expect(resp.Payload.(kafkaconnect.Status)).To(Equal(status))
