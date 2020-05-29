@@ -121,7 +121,63 @@ var _ = Describe("Read from Kafka Connect", func() {
 		Expect(err).To(BeNil())
 		Expect(resp.Result).To(BeIdenticalTo("success"))
 		Expect(resp.Payload.(kafkaconnect.Status)).To(Equal(status))
-		Expect(resp.Payload.(kafkaconnect.Status).GetActiveTasksCount()).To(Equal(1))
+	})
+
+	It("should get correct number of failed and active tasks from a Status", func() {
+		task0 := kafkaconnect.Task{
+			ID:       0,
+			State:    "RUNNING",
+			WorkerID: "somenode",
+		}
+
+		task1 := kafkaconnect.Task{
+			ID:       0,
+			State:    "FAILED",
+			WorkerID: "somenode",
+		}
+
+		status0 := kafkaconnect.Status{
+			Name: "blah",
+			Connector: kafkaconnect.ConnectorStatus{
+				State:    "RUNNING",
+				WorkerID: "somenode",
+			},
+			Tasks: []kafkaconnect.Task{
+				task0,
+				task1,
+			},
+		}
+
+		status1 := kafkaconnect.Status{
+			Name: "blah",
+			Connector: kafkaconnect.ConnectorStatus{
+				State:    "RUNNING",
+				WorkerID: "somenode",
+			},
+			Tasks: []kafkaconnect.Task{
+				task0,
+				task0,
+			},
+		}
+
+		status2 := kafkaconnect.Status{
+			Name: "blah",
+			Connector: kafkaconnect.ConnectorStatus{
+				State:    "RUNNING",
+				WorkerID: "somenode",
+			},
+			Tasks: []kafkaconnect.Task{
+				task1,
+				task1,
+			},
+		}
+
+		Expect(status0.GetActiveTasksCount()).To(Equal(1))
+		Expect(status0.GetFailedTasksCount()).To(Equal(1))
+		Expect(status1.GetActiveTasksCount()).To(Equal(2))
+		Expect(status1.GetFailedTasksCount()).To(Equal(0))
+		Expect(status2.GetActiveTasksCount()).To(Equal(0))
+		Expect(status2.GetFailedTasksCount()).To(Equal(2))
 	})
 
 	It("should throw an error because connector name is invalid", func() {
