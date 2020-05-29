@@ -261,8 +261,8 @@ func (kcc Client) Delete(connector string) (*Response, error) {
 	return nil, errors.New("Malformed connector name")
 }
 
-// Status ...
-func (kcc Client) Status(connector string) (*Response, error) {
+// GetStatus ...
+func (kcc Client) GetStatus(connector string) (*Response, error) {
 	var kcError Error
 	var connectorStatus Status
 	if govalidator.IsDNSName(connector) {
@@ -287,6 +287,42 @@ func (kcc Client) Status(connector string) (*Response, error) {
 			return response, fmt.Errorf("Received error from Kafka Connect (code:'%d', message:'%s')", kcError.ErrorCode, kcError.Message)
 		}
 		return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
+	}
+	return nil, errors.New("Malformed connector name")
+}
+
+// RestartTask ...
+func (kcc Client) RestartTask(connector string, taskID int) (*Response, error) {
+	if govalidator.IsDNSName(connector) {
+		endpoint := fmt.Sprintf("/connectors/%s/tasks/%d/restart", connector, taskID)
+		status, _, err := kcc.httpClient.Post(endpoint, []byte{})
+
+		if status == 204 {
+			response := new(Response)
+			response.Result = "success"
+			return response, nil
+		}
+		response := new(Response)
+		response.Result = "error"
+		return response, err
+	}
+	return nil, errors.New("Malformed connector name")
+}
+
+// RestartConnector ...
+func (kcc Client) RestartConnector(connector string) (*Response, error) {
+	if govalidator.IsDNSName(connector) {
+		endpoint := fmt.Sprintf("/connectors/%s/restart", connector)
+		status, _, err := kcc.httpClient.Post(endpoint, []byte{})
+
+		if status == 204 {
+			response := new(Response)
+			response.Result = "success"
+			return response, nil
+		}
+		response := new(Response)
+		response.Result = "error"
+		return response, err
 	}
 	return nil, errors.New("Malformed connector name")
 }
