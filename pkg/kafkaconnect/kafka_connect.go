@@ -38,6 +38,17 @@ func (s Status) GetActiveTasksCount() int {
 	return count
 }
 
+// GetFailedTasksCount ...
+func (s Status) GetFailedTasksCount() int {
+	count := 0
+	for _, t := range s.Tasks {
+		if t.State == "FAILED" {
+			count++
+		}
+	}
+	return count
+}
+
 // Task ...
 type Task struct {
 	ID       int    `json:"id"`
