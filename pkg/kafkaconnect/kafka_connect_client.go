@@ -10,7 +10,9 @@ type KafkaConnectClient interface {
 	Read(connector string) (*Response, error)
 	Update(connector Connector) (*Response, error)
 	Delete(connector string) (*Response, error)
-	Status(connector string) (*Response, error)
+	GetStatus(connector string) (*Response, error)
+	RestartTask(connector string, taskID int) (*Response, error)
+	RestartConnector(connector string) (*Response, error)
 }
 
 // KafkaConnectClientFactory ...
