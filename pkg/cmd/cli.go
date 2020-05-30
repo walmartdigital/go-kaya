@@ -36,6 +36,7 @@ func main() {
 	var configFile string
 	var action string
 	var connector string
+	var taskID int
 
 	var logger *zap.Logger
 	var err error
@@ -57,6 +58,7 @@ func main() {
 	flag.StringVarP(&configFile, "file", "f", "", "Path to connector config file")
 	flag.StringVarP(&action, "cmd", "c", "", "Action to perform against Kafka Connect instance")
 	flag.StringVarP(&connector, "name", "n", "", "Connector name on which to perform action")
+	flag.IntVarP(&taskID, "taskId", "t", 0, "Task ID to restart")
 
 	flag.Parse()
 
@@ -86,7 +88,7 @@ func main() {
 			zap.L().Info(string(bytes))
 		}
 	case "status":
-		response, err := client.Status(connector)
+		response, err := client.GetStatus(connector)
 		if err != nil {
 			zap.L().Error(err.Error())
 		} else {
@@ -148,6 +150,26 @@ func main() {
 			zap.L().Info("Connector deleted successfully")
 		} else {
 			zap.L().Info("Could not delete connector")
+		}
+	case "restart-connector":
+		response, err := client.RestartConnector(connector)
+		if err != nil {
+			zap.L().Error(err.Error())
+		}
+		if response.Result == "success" {
+			zap.L().Info("Connector restarted successfully")
+		} else {
+			zap.L().Info("Could not restart connector")
+		}
+	case "restart-task":
+		response, err := client.RestartTask(connector, taskID)
+		if err != nil {
+			zap.L().Error(err.Error())
+		}
+		if response.Result == "success" {
+			zap.L().Info("Task restarted successfully")
+		} else {
+			zap.L().Info("Could not restart task")
 		}
 	default:
 		zap.L().Fatal("Invalid action requested")
