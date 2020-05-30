@@ -49,6 +49,11 @@ func (s Status) GetFailedTasksCount() int {
 	return count
 }
 
+// IsConnectorFailed ...
+func (s Status) IsConnectorFailed() bool {
+	return s.Connector.State == "FAILED"
+}
+
 // Task ...
 type Task struct {
 	ID       int    `json:"id"`

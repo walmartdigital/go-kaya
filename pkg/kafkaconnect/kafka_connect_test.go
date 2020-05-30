@@ -180,6 +180,27 @@ var _ = Describe("Read from Kafka Connect", func() {
 		Expect(status2.GetFailedTasksCount()).To(Equal(2))
 	})
 
+	It("should indicate whether a connector is failed", func() {
+		status1 := kafkaconnect.Status{
+			Name: "blah",
+			Connector: kafkaconnect.ConnectorStatus{
+				State:    "PAUSED",
+				WorkerID: "somenode",
+			},
+		}
+
+		status2 := kafkaconnect.Status{
+			Name: "blah",
+			Connector: kafkaconnect.ConnectorStatus{
+				State:    "FAILED",
+				WorkerID: "somenode",
+			},
+		}
+
+		Expect(status1.IsConnectorFailed()).To(Equal(false))
+		Expect(status2.IsConnectorFailed()).To(Equal(true))
+	})
+
 	It("should throw an error because connector name is invalid", func() {
 		resp, err2 := kafkaConnectClient.Read("/$%&")
 		Expect(err2).NotTo(BeNil())
