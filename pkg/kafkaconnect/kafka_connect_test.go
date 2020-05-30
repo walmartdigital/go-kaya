@@ -173,11 +173,11 @@ var _ = Describe("Read from Kafka Connect", func() {
 		}
 
 		Expect(status0.GetActiveTasksCount()).To(Equal(1))
-		Expect(status0.GetFailedTasksCount()).To(Equal(1))
+		Expect(status0.GetFailedTasks()).To(Equal([]int{1}))
 		Expect(status1.GetActiveTasksCount()).To(Equal(2))
-		Expect(status1.GetFailedTasksCount()).To(Equal(0))
+		Expect(status1.GetFailedTasks()).To(BeEmpty())
 		Expect(status2.GetActiveTasksCount()).To(Equal(0))
-		Expect(status2.GetFailedTasksCount()).To(Equal(2))
+		Expect(status2.GetFailedTasks()).To(Equal([]int{0, 1}))
 	})
 
 	It("should indicate whether a connector is failed", func() {
