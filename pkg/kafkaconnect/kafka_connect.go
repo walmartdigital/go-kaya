@@ -54,6 +54,14 @@ func (s Status) GetTaskCount() int {
 	return len(s.Tasks)
 }
 
+// IsTaskFailed ...
+func (s Status) IsTaskFailed(i int) (bool, error) {
+	if i >= 0 && i < len(s.Tasks) {
+		return s.Tasks[i].State == "FAILED", nil
+	}
+	return true, fmt.Errorf("Task index is out of bounds")
+}
+
 // IsConnectorFailed ...
 func (s Status) IsConnectorFailed() bool {
 	return s.Connector.State == "FAILED"
