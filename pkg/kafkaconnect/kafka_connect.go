@@ -38,16 +38,20 @@ func (s Status) GetActiveTasksCount() int {
 	return count
 }
 
-// GetFailedTasksCount ...
+// GetFailedTasks ...
 func (s Status) GetFailedTasks() []int {
 	var failed []int
-
 	for i, t := range s.Tasks {
 		if t.State == "FAILED" {
 			failed = append(failed, i)
 		}
 	}
 	return failed
+}
+
+// GetTaskCount ...
+func (s Status) GetTaskCount() int {
+	return len(s.Tasks)
 }
 
 // IsConnectorFailed ...

@@ -180,6 +180,49 @@ var _ = Describe("Read from Kafka Connect", func() {
 		Expect(status2.GetFailedTasks()).To(Equal([]int{0, 1}))
 	})
 
+	It("should get the number of tasks in a Status", func() {
+		task0 := kafkaconnect.Task{
+			ID:       0,
+			State:    "RUNNING",
+			WorkerID: "somenode",
+		}
+
+		status0 := kafkaconnect.Status{
+			Name: "blah",
+			Connector: kafkaconnect.ConnectorStatus{
+				State:    "RUNNING",
+				WorkerID: "somenode",
+			},
+		}
+
+		status1 := kafkaconnect.Status{
+			Name: "blah",
+			Connector: kafkaconnect.ConnectorStatus{
+				State:    "RUNNING",
+				WorkerID: "somenode",
+			},
+			Tasks: []kafkaconnect.Task{
+				task0,
+			},
+		}
+
+		status2 := kafkaconnect.Status{
+			Name: "blah",
+			Connector: kafkaconnect.ConnectorStatus{
+				State:    "RUNNING",
+				WorkerID: "somenode",
+			},
+			Tasks: []kafkaconnect.Task{
+				task0,
+				task0,
+			},
+		}
+
+		Expect(status0.GetTaskCount()).To(Equal(0))
+		Expect(status1.GetTaskCount()).To(Equal(1))
+		Expect(status2.GetTaskCount()).To(Equal(2))
+	})
+
 	It("should indicate whether a connector is failed", func() {
 		status1 := kafkaconnect.Status{
 			Name: "blah",
