@@ -90,6 +90,8 @@ type ConnectorConfig struct {
 	TopicIndexMap                string `json:"topic.index.map" validate:"required,topicindexmap"`
 	BatchSize                    string `json:"batch.size" validate:"required,numeric"`
 	ConnectionURL                string `json:"connection.url" validate:"required,url"`
+	ConnectionUsername           string `json:"connection.username,omitempty"`
+	ConnectionPassword           string `json:"connection.password,omitempty"`
 	KeyIgnore                    string `json:"key.ignore" validate:"required,oneof=true false"`
 	SchemaIgnore                 string `json:"schema.ignore,omitempty" validate:"required,oneof=true false"`
 	Type                         string `json:"type,omitempty" validate:"omitempty,connectorname"`
