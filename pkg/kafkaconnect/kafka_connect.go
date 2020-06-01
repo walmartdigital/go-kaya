@@ -211,7 +211,7 @@ func (kcc Client) Read(connector string) (*Response, error) {
 		err = json.Unmarshal(*body, &kcError)
 		if err == nil {
 			response := new(Response)
-			response.Result = "error"
+			response.Result = "notfound"
 			return response, fmt.Errorf("Received error from Kafka Connect (code:'%d', message:'%s')", kcError.ErrorCode, kcError.Message)
 		}
 		return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
