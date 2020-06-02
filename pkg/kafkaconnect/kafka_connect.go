@@ -7,6 +7,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/walmartdigital/go-kaya/pkg/client"
+	"github.com/walmartdigital/go-kaya/pkg/utils/types"
 
 	// TODO: create an interface for this logging library
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -83,28 +84,28 @@ type Connector struct {
 
 // ConnectorConfig ...
 type ConnectorConfig struct {
-	Name                         string `json:"name,omitempty" validate:"required,connectorname"`
-	ConnectorClass               string `json:"connector.class" validate:"required,fqdn"`
-	DocumentType                 string `json:"type.name" validate:"required,esdoctype"`
-	Topics                       string `json:"topics" validate:"required,topiclist"`
-	TopicIndexMap                string `json:"topic.index.map" validate:"required,topicindexmap"`
-	ConnectionURL                string `json:"connection.url" validate:"required,url"`
-	ConnectionUsername           string `json:"connection.username,omitempty"`
-	ConnectionPassword           string `json:"connection.password,omitempty"`
-	KeyIgnore                    bool   `json:"key.ignore"`
-	SchemaIgnore                 bool   `json:"schema.ignore,omitempty"`
-	Type                         string `json:"type,omitempty" validate:"omitempty,connectorname"`
-	BehaviorOnMalformedDocuments string `json:"behavior.on.malformed.documents,omitempty"  validate:"required,oneof=ignore fail warn"`
-	BatchSize                    int    `json:"batch.size,omitempty"`
-	MaxInFlightRequests          int    `json:"max.in.flight.requests,omitempty"`
-	MaxBufferedRecords           int    `json:"max.buffered.records,omitempty"`
-	LingerMs                     int    `json:"linger.ms,omitempty"`
-	FlushTimeoutMs               int    `json:"flush.timeout.ms,omitempty"`
-	MaxRetries                   int    `json:"max.retries,omitempty"`
-	RetryBackoffMs               int    `json:"retry.backoff.ms,omitempty"`
-	ConnectionCompression        bool   `json:"connection.compression,omitempty"`
-	ConnectionTimeoutMs          int    `json:"connection.timeout.ms,omitempty"`
-	ReadTimeoutMs                int    `json:"read.timeout.ms,omitempty"`
+	Name                         string         `json:"name,omitempty" validate:"required,connectorname"`
+	ConnectorClass               string         `json:"connector.class" validate:"required,fqdn"`
+	DocumentType                 string         `json:"type.name" validate:"required,esdoctype"`
+	Topics                       string         `json:"topics" validate:"required,topiclist"`
+	TopicIndexMap                string         `json:"topic.index.map" validate:"required,topicindexmap"`
+	ConnectionURL                string         `json:"connection.url" validate:"required,url"`
+	ConnectionUsername           string         `json:"connection.username,omitempty"`
+	ConnectionPassword           string         `json:"connection.password,omitempty"`
+	KeyIgnore                    types.FlexBool `json:"key.ignore"`
+	SchemaIgnore                 types.FlexBool `json:"schema.ignore,omitempty"`
+	Type                         string         `json:"type,omitempty" validate:"omitempty,connectorname"`
+	BehaviorOnMalformedDocuments string         `json:"behavior.on.malformed.documents,omitempty"  validate:"required,oneof=ignore fail warn"`
+	BatchSize                    types.FlexInt  `json:"batch.size,omitempty"`
+	MaxInFlightRequests          types.FlexInt  `json:"max.in.flight.requests,omitempty"`
+	MaxBufferedRecords           types.FlexInt  `json:"max.buffered.records,omitempty"`
+	LingerMs                     types.FlexInt  `json:"linger.ms,omitempty"`
+	FlushTimeoutMs               types.FlexInt  `json:"flush.timeout.ms,omitempty"`
+	MaxRetries                   types.FlexInt  `json:"max.retries,omitempty"`
+	RetryBackoffMs               types.FlexInt  `json:"retry.backoff.ms,omitempty"`
+	ConnectionCompression        types.FlexBool `json:"connection.compression,omitempty"`
+	ConnectionTimeoutMs          types.FlexInt  `json:"connection.timeout.ms,omitempty"`
+	ReadTimeoutMs                types.FlexInt  `json:"read.timeout.ms,omitempty"`
 }
 
 // Response ...
