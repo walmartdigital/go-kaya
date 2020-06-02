@@ -88,14 +88,23 @@ type ConnectorConfig struct {
 	DocumentType                 string `json:"type.name" validate:"required,esdoctype"`
 	Topics                       string `json:"topics" validate:"required,topiclist"`
 	TopicIndexMap                string `json:"topic.index.map" validate:"required,topicindexmap"`
-	BatchSize                    string `json:"batch.size" validate:"required,numeric"`
 	ConnectionURL                string `json:"connection.url" validate:"required,url"`
 	ConnectionUsername           string `json:"connection.username,omitempty"`
 	ConnectionPassword           string `json:"connection.password,omitempty"`
-	KeyIgnore                    string `json:"key.ignore" validate:"required,oneof=true false"`
-	SchemaIgnore                 string `json:"schema.ignore,omitempty" validate:"required,oneof=true false"`
+	KeyIgnore                    bool   `json:"key.ignore"`
+	SchemaIgnore                 bool   `json:"schema.ignore,omitempty"`
 	Type                         string `json:"type,omitempty" validate:"omitempty,connectorname"`
 	BehaviorOnMalformedDocuments string `json:"behavior.on.malformed.documents,omitempty"  validate:"required,oneof=ignore fail warn"`
+	BatchSize                    int    `json:"batch.size,omitempty"`
+	MaxInFlightRequests          int    `json:"max.in.flight.requests,omitempty"`
+	MaxBufferedRecords           int    `json:"max.buffered.records,omitempty"`
+	LingerMs                     int    `json:"linger.ms,omitempty"`
+	FlushTimeoutMs               int    `json:"flush.timeout.ms,omitempty"`
+	MaxRetries                   int    `json:"max.retries,omitempty"`
+	RetryBackoffMs               int    `json:"retry.backoff.ms,omitempty"`
+	ConnectionCompression        bool   `json:"connection.compression,omitempty"`
+	ConnectionTimeoutMs          int    `json:"connection.timeout.ms,omitempty"`
+	ReadTimeoutMs                int    `json:"read.timeout.ms,omitempty"`
 }
 
 // Response ...
