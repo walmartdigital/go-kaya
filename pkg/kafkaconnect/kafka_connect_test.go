@@ -63,10 +63,10 @@ var _ = Describe("Read from Kafka Connect", func() {
 			DocumentType:   "log",
 			Topics:         "_dumblogger.logs",
 			TopicIndexMap:  "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
-			BatchSize:      "100",
+			BatchSize:      100,
 			ConnectionURL:  "http://elasticsearch-master.default.svc.cluster.local:9200",
-			KeyIgnore:      "true",
-			SchemaIgnore:   "true",
+			KeyIgnore:      true,
+			SchemaIgnore:   true,
 		}
 
 		kafkaConnectClient, _ = kafkaconnect.NewClient("somehost", client.HTTPClientConfig{}, fakeHTTPClientFactory)
@@ -300,7 +300,7 @@ var _ = Describe("Read from Kafka Connect", func() {
 
 		resp, err2 := kafkaConnectClient.Read("doesntexist")
 		Expect(err2).NotTo(BeNil())
-		Expect(resp.Result).To(Equal("error"))
+		Expect(resp.Result).To(Equal("notfound"))
 	})
 })
 
@@ -326,10 +326,10 @@ var _ = Describe("Create Kafka Connect connectors", func() {
 				DocumentType:   "log",
 				Topics:         "_dumblogger.logs",
 				TopicIndexMap:  "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
-				BatchSize:      "100",
+				BatchSize:      100,
 				ConnectionURL:  "http://elasticsearch-master.default.svc.cluster.local:9200",
-				KeyIgnore:      "true",
-				SchemaIgnore:   "true",
+				KeyIgnore:      true,
+				SchemaIgnore:   true,
 			},
 		}
 
@@ -340,10 +340,10 @@ var _ = Describe("Create Kafka Connect connectors", func() {
 				DocumentType:   "log",
 				Topics:         "_dumblogger.logs",
 				TopicIndexMap:  "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
-				BatchSize:      "100",
+				BatchSize:      100,
 				ConnectionURL:  "http://elasticsearch-master.default.svc.cluster.local:9200",
-				KeyIgnore:      "true",
-				SchemaIgnore:   "true",
+				KeyIgnore:      true,
+				SchemaIgnore:   true,
 				Type:           "sink",
 			},
 		}
@@ -408,10 +408,10 @@ var _ = Describe("Update Kafka Connect connectors", func() {
 				DocumentType:   "log",
 				Topics:         "_dumblogger.logs",
 				TopicIndexMap:  "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
-				BatchSize:      "100",
+				BatchSize:      100,
 				ConnectionURL:  "http://elasticsearch-master.default.svc.cluster.local:9200",
-				KeyIgnore:      "true",
-				SchemaIgnore:   "true",
+				KeyIgnore:      true,
+				SchemaIgnore:   true,
 			},
 		}
 		resultConnector = kafkaconnect.Connector{
@@ -421,10 +421,10 @@ var _ = Describe("Update Kafka Connect connectors", func() {
 				DocumentType:   "log",
 				Topics:         "_dumblogger.logs",
 				TopicIndexMap:  "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
-				BatchSize:      "100",
+				BatchSize:      100,
 				ConnectionURL:  "http://elasticsearch-master.default.svc.cluster.local:9200",
-				KeyIgnore:      "true",
-				SchemaIgnore:   "true",
+				KeyIgnore:      true,
+				SchemaIgnore:   true,
 				Type:           "sink",
 			},
 		}
