@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/google/go-cmp/cmp"
 	"github.com/walmartdigital/go-kaya/pkg/client"
 	"github.com/walmartdigital/go-kaya/pkg/utils/types"
 
@@ -14,6 +15,41 @@ import (
 )
 
 var log = logf.Log.WithName("kafka-connect")
+
+// ConnectorConfigComparer ...
+var ConnectorConfigComparer cmp.Option
+
+func init() {
+	ConnectorConfigComparer = cmp.Comparer(func(a, b ConnectorConfig) bool {
+		if (a == ConnectorConfig{}) && (b == ConnectorConfig{}) {
+			return true
+		} else if (a != ConnectorConfig{}) && (b != ConnectorConfig{}) {
+			return a.Name == b.Name &&
+				a.ConnectorClass == b.ConnectorClass &&
+				a.DocumentType == b.DocumentType &&
+				a.Topics == b.Topics &&
+				a.TopicIndexMap == b.TopicIndexMap &&
+				a.BatchSize == b.BatchSize &&
+				a.ConnectionURL == b.ConnectionURL &&
+				a.KeyIgnore == b.KeyIgnore &&
+				a.SchemaIgnore == b.SchemaIgnore &&
+				a.BehaviorOnMalformedDocuments == b.BehaviorOnMalformedDocuments &&
+				a.ConnectionUsername == b.ConnectionUsername &&
+				a.ConnectionPassword == b.ConnectionPassword &&
+				a.Type == b.Type &&
+				a.MaxInFlightRequests == b.MaxInFlightRequests &&
+				a.MaxBufferedRecords == b.MaxBufferedRecords &&
+				a.LingerMs == b.LingerMs &&
+				a.FlushTimeoutMs == b.FlushTimeoutMs &&
+				a.MaxRetries == b.MaxRetries &&
+				a.RetryBackoffMs == b.RetryBackoffMs &&
+				a.ConnectionCompression == b.ConnectionCompression &&
+				a.ConnectionTimeoutMs == b.ConnectionTimeoutMs &&
+				a.ReadTimeoutMs == b.ReadTimeoutMs
+		}
+		return false
+	})
+}
 
 // ConnectorStatus ...
 type ConnectorStatus struct {
