@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/walmartdigital/go-kaya/pkg/client"
@@ -516,5 +517,116 @@ var _ = Describe("Delete Kafka Connect connectors", func() {
 		resp, err2 := kafkaConnectClient.Delete("logging")
 		Expect(err2).NotTo(BeNil())
 		Expect(resp.Result).To(BeIdenticalTo("error"))
+	})
+
+	It("should determine the two provided ConnectorConfig objects are equal", func() {
+		a := kafkaconnect.ConnectorConfig{
+			Name:                         "Hello",
+			ConnectorClass:               "World",
+			DocumentType:                 "log",
+			Topics:                       "_skynet.logs",
+			TopicIndexMap:                "_skynet.logs:<logs-pd-skynet-{now/d}>",
+			ConnectionURL:                "http://elasticsearch:9200",
+			ConnectionUsername:           "john",
+			ConnectionPassword:           "doe",
+			KeyIgnore:                    true,
+			SchemaIgnore:                 true,
+			Type:                         "sometype",
+			BehaviorOnMalformedDocuments: "ignore",
+			BatchSize:                    100,
+			MaxInFlightRequests:          5,
+			MaxBufferedRecords:           100,
+			LingerMs:                     1,
+			FlushTimeoutMs:               10,
+			MaxRetries:                   3,
+			RetryBackoffMs:               3,
+			ConnectionCompression:        false,
+			ConnectionTimeoutMs:          5,
+			ReadTimeoutMs:                5,
+		}
+
+		b := kafkaconnect.ConnectorConfig{
+			Name:                         "Hello",
+			ConnectorClass:               "World",
+			DocumentType:                 "log",
+			Topics:                       "_skynet.logs",
+			TopicIndexMap:                "_skynet.logs:<logs-pd-skynet-{now/d}>",
+			ConnectionURL:                "http://elasticsearch:9200",
+			ConnectionUsername:           "john",
+			ConnectionPassword:           "doe",
+			KeyIgnore:                    true,
+			SchemaIgnore:                 true,
+			Type:                         "sometype",
+			BehaviorOnMalformedDocuments: "ignore",
+			BatchSize:                    100,
+			MaxInFlightRequests:          5,
+			MaxBufferedRecords:           100,
+			LingerMs:                     1,
+			FlushTimeoutMs:               10,
+			MaxRetries:                   3,
+			RetryBackoffMs:               3,
+			ConnectionCompression:        false,
+			ConnectionTimeoutMs:          5,
+			ReadTimeoutMs:                5,
+		}
+
+		result := cmp.Equal(a, b, kafkaconnect.ConnectorConfigComparer)
+
+		Expect(result).To(Equal(true))
+	})
+
+	It("should determine the two provided ConnectorConfig objects are equal", func() {
+		a := kafkaconnect.ConnectorConfig{
+			Name:                         "Hello",
+			ConnectorClass:               "World",
+			DocumentType:                 "log",
+			Topics:                       "_skynet.logs",
+			TopicIndexMap:                "_skynet.logs:<logs-pd-skynet-{now/d}>",
+			BatchSize:                    100,
+			ConnectionURL:                "http://elasticsearch:9200",
+			KeyIgnore:                    true,
+			SchemaIgnore:                 true,
+			BehaviorOnMalformedDocuments: "ignore",
+			ConnectionUsername:           "john",
+			ConnectionPassword:           "doe",
+			Type:                         "sometype",
+			MaxInFlightRequests:          5,
+			MaxBufferedRecords:           100,
+			LingerMs:                     1,
+			FlushTimeoutMs:               10,
+			MaxRetries:                   3,
+			RetryBackoffMs:               3,
+			ConnectionCompression:        false,
+			ConnectionTimeoutMs:          5,
+			ReadTimeoutMs:                5,
+		}
+
+		b := kafkaconnect.ConnectorConfig{
+			Name:                         "Hello",
+			ConnectorClass:               "World",
+			DocumentType:                 "log",
+			Topics:                       "_skynet.logs",
+			TopicIndexMap:                "_skynet.logs:<logs-pd-skynet-{now/d}>",
+			BatchSize:                    100,
+			ConnectionURL:                "http://elasticsearch:9200",
+			KeyIgnore:                    true,
+			SchemaIgnore:                 true,
+			BehaviorOnMalformedDocuments: "ignore",
+			ConnectionUsername:           "bob",
+			ConnectionPassword:           "doe",
+			Type:                         "sometype",
+			MaxInFlightRequests:          6,
+			MaxBufferedRecords:           101,
+			LingerMs:                     2,
+			FlushTimeoutMs:               12,
+			MaxRetries:                   4,
+			RetryBackoffMs:               6,
+			ConnectionCompression:        false,
+			ConnectionTimeoutMs:          6,
+			ReadTimeoutMs:                87,
+		}
+
+		result := cmp.Equal(a, b, kafkaconnect.ConnectorConfigComparer)
+		Expect(result).To(Equal(false))
 	})
 })
