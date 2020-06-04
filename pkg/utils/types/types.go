@@ -5,9 +5,13 @@ import (
 	"strconv"
 )
 
+// FlexInt ...
 type FlexInt int
+
+// FlexBool ...
 type FlexBool bool
 
+// UnmarshalJSON ...
 func (fi *FlexInt) UnmarshalJSON(b []byte) error {
 	if b[0] != '"' {
 		return json.Unmarshal(b, (*int)(fi))
@@ -24,6 +28,12 @@ func (fi *FlexInt) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// MarshalJSON ...
+func (fi *FlexInt) MarshalJSON() ([]byte, error) {
+	return []byte(string(*fi)), nil
+}
+
+// UnmarshalJSON ...
 func (fi *FlexBool) UnmarshalJSON(b []byte) error {
 	if b[0] != '"' {
 		return json.Unmarshal(b, (*bool)(fi))
@@ -38,4 +48,12 @@ func (fi *FlexBool) UnmarshalJSON(b []byte) error {
 	}
 	*fi = FlexBool(i)
 	return nil
+}
+
+// MarshalJSON ...
+func (fi *FlexBool) MarshalJSON() ([]byte, error) {
+	if *fi {
+		return []byte("true"), nil
+	}
+	return []byte("false"), nil
 }
