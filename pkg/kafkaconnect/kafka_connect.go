@@ -148,7 +148,7 @@ type ConnectorConfig struct {
 	ConnectionCompression        types.FlexBool `json:"connection.compression"`
 	ConnectionTimeoutMs          types.FlexInt  `json:"connection.timeout.ms,omitempty"`
 	ReadTimeoutMs                types.FlexInt  `json:"read.timeout.ms,omitempty"`
-	TasksMax                     types.FlexInt  `json:"task.max,omitempty"`
+	TasksMax                     types.FlexInt  `json:"tasks.max,omitempty"`
 	OffsetFlushTimeoutMs         types.FlexInt  `json:"offset.flush.timeout.ms,omitempty"`
 	HeartbeatIntervalMs          types.FlexInt  `json:"heartbeat.interval.ms,omitempty"`
 	ValueConverterSchemasEnable  types.FlexBool `json:"value.converter.schemas.enable"`
