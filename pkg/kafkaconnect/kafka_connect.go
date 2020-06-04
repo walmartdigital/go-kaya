@@ -45,7 +45,13 @@ func init() {
 				a.RetryBackoffMs == b.RetryBackoffMs &&
 				a.ConnectionCompression == b.ConnectionCompression &&
 				a.ConnectionTimeoutMs == b.ConnectionTimeoutMs &&
-				a.ReadTimeoutMs == b.ReadTimeoutMs
+				a.ReadTimeoutMs == b.ReadTimeoutMs &&
+				a.TasksMax == b.TasksMax &&
+				a.OffsetFlushTimeoutMs == b.OffsetFlushTimeoutMs &&
+				a.HeartbeatIntervalMs == b.HeartbeatIntervalMs &&
+				a.ValueConverterSchemasEnable == b.ValueConverterSchemasEnable &&
+				a.ValueConverter == b.ValueConverter
+
 		}
 		return false
 	})
@@ -142,6 +148,11 @@ type ConnectorConfig struct {
 	ConnectionCompression        types.FlexBool `json:"connection.compression,omitempty"`
 	ConnectionTimeoutMs          types.FlexInt  `json:"connection.timeout.ms,omitempty"`
 	ReadTimeoutMs                types.FlexInt  `json:"read.timeout.ms,omitempty"`
+	TasksMax                     types.FlexInt  `json:"task.max,omitempty"`
+	OffsetFlushTimeoutMs         types.FlexInt  `json:"offset.flush.timeout.ms,omitempty"`
+	HeartbeatIntervalMs          types.FlexInt  `json:"heartbeat.interval.ms,omitempty"`
+	ValueConverterSchemasEnable  types.FlexBool `json:"value.converter.schemas.enable,omitempty"`
+	ValueConverter               string         `json:"value.converter,omitempty" validate:"omitempty,fqdn"`
 }
 
 // Response ...

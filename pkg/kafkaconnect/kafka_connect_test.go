@@ -543,6 +543,11 @@ var _ = Describe("Delete Kafka Connect connectors", func() {
 			ConnectionCompression:        false,
 			ConnectionTimeoutMs:          5,
 			ReadTimeoutMs:                5,
+			TasksMax:                     5,
+			OffsetFlushTimeoutMs:         8000,
+			HeartbeatIntervalMs:          1000,
+			ValueConverterSchemasEnable:  false,
+			ValueConverter:               "org.apache.kafka.connect.json.JsonConverter",
 		}
 
 		b := kafkaconnect.ConnectorConfig{
@@ -568,6 +573,11 @@ var _ = Describe("Delete Kafka Connect connectors", func() {
 			ConnectionCompression:        false,
 			ConnectionTimeoutMs:          5,
 			ReadTimeoutMs:                5,
+			TasksMax:                     5,
+			OffsetFlushTimeoutMs:         8000,
+			HeartbeatIntervalMs:          1000,
+			ValueConverterSchemasEnable:  false,
+			ValueConverter:               "org.apache.kafka.connect.json.JsonConverter",
 		}
 
 		result := cmp.Equal(a, b, kafkaconnect.ConnectorConfigComparer)
@@ -599,6 +609,11 @@ var _ = Describe("Delete Kafka Connect connectors", func() {
 			ConnectionCompression:        false,
 			ConnectionTimeoutMs:          5,
 			ReadTimeoutMs:                5,
+			TasksMax:                     5,
+			OffsetFlushTimeoutMs:         8000,
+			HeartbeatIntervalMs:          1000,
+			ValueConverterSchemasEnable:  false,
+			ValueConverter:               "org.apache.kafka.connect.json.JsonConverter",
 		}
 
 		b := kafkaconnect.ConnectorConfig{
@@ -624,6 +639,11 @@ var _ = Describe("Delete Kafka Connect connectors", func() {
 			ConnectionCompression:        false,
 			ConnectionTimeoutMs:          6,
 			ReadTimeoutMs:                87,
+			TasksMax:                     5,
+			OffsetFlushTimeoutMs:         8000,
+			HeartbeatIntervalMs:          1000,
+			ValueConverterSchemasEnable:  false,
+			ValueConverter:               "org.apache.kafka.connect.json.JsonConverter",
 		}
 
 		result := cmp.Equal(a, b, kafkaconnect.ConnectorConfigComparer)
