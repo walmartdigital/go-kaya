@@ -28,11 +28,6 @@ func (fi *FlexInt) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// MarshalJSON ...
-func (fi *FlexInt) MarshalJSON() ([]byte, error) {
-	return []byte(string(*fi)), nil
-}
-
 // UnmarshalJSON ...
 func (fi *FlexBool) UnmarshalJSON(b []byte) error {
 	if b[0] != '"' {
@@ -48,12 +43,4 @@ func (fi *FlexBool) UnmarshalJSON(b []byte) error {
 	}
 	*fi = FlexBool(i)
 	return nil
-}
-
-// MarshalJSON ...
-func (fi *FlexBool) MarshalJSON() ([]byte, error) {
-	if *fi {
-		return []byte("true"), nil
-	}
-	return []byte("false"), nil
 }
