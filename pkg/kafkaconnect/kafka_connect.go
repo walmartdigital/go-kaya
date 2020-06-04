@@ -135,7 +135,7 @@ type ConnectorConfig struct {
 	ConnectionUsername           string         `json:"connection.username,omitempty"`
 	ConnectionPassword           string         `json:"connection.password,omitempty"`
 	KeyIgnore                    types.FlexBool `json:"key.ignore"`
-	SchemaIgnore                 types.FlexBool `json:"schema.ignore,omitempty"`
+	SchemaIgnore                 types.FlexBool `json:"schema.ignore"`
 	Type                         string         `json:"type,omitempty" validate:"omitempty,connectorname"`
 	BehaviorOnMalformedDocuments string         `json:"behavior.on.malformed.documents,omitempty"  validate:"required,oneof=ignore fail warn"`
 	BatchSize                    types.FlexInt  `json:"batch.size,omitempty"`
@@ -145,13 +145,13 @@ type ConnectorConfig struct {
 	FlushTimeoutMs               types.FlexInt  `json:"flush.timeout.ms,omitempty"`
 	MaxRetries                   types.FlexInt  `json:"max.retries,omitempty"`
 	RetryBackoffMs               types.FlexInt  `json:"retry.backoff.ms,omitempty"`
-	ConnectionCompression        types.FlexBool `json:"connection.compression,omitempty"`
+	ConnectionCompression        types.FlexBool `json:"connection.compression"`
 	ConnectionTimeoutMs          types.FlexInt  `json:"connection.timeout.ms,omitempty"`
 	ReadTimeoutMs                types.FlexInt  `json:"read.timeout.ms,omitempty"`
 	TasksMax                     types.FlexInt  `json:"task.max,omitempty"`
 	OffsetFlushTimeoutMs         types.FlexInt  `json:"offset.flush.timeout.ms,omitempty"`
 	HeartbeatIntervalMs          types.FlexInt  `json:"heartbeat.interval.ms,omitempty"`
-	ValueConverterSchemasEnable  types.FlexBool `json:"value.converter.schemas.enable,omitempty"`
+	ValueConverterSchemasEnable  types.FlexBool `json:"value.converter.schemas.enable"`
 	ValueConverter               string         `json:"value.converter,omitempty" validate:"omitempty,fqdn"`
 }
 
