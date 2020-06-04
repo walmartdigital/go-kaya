@@ -9,6 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/walmartdigital/go-kaya/pkg/client"
 	"github.com/walmartdigital/go-kaya/pkg/utils/types"
+	"go.uber.org/zap"
 
 	// TODO: create an interface for this logging library
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -220,6 +221,8 @@ func (kcc Client) Create(connector Connector) (*Response, error) {
 		if err != nil {
 			return &Response{Result: "error"}, errors.New("Failed to serialize connector configuration")
 		}
+		zap.L().Info("Sending POST to /connectors endpoint", zap.String("payload", string(configBytes)))
+
 		status, body, err := kcc.httpClient.Post("/connectors", configBytes)
 		if status == 201 {
 			var createdConnector Connector
