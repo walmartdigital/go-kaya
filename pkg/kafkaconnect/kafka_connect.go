@@ -6,56 +6,13 @@ import (
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/google/go-cmp/cmp"
 	"github.com/walmartdigital/go-kaya/pkg/client"
-	"github.com/walmartdigital/go-kaya/pkg/utils/types"
 
 	// TODO: create an interface for this logging library
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 var log = logf.Log.WithName("kafka-connect")
-
-// ConnectorConfigComparer ...
-var ConnectorConfigComparer cmp.Option
-
-func init() {
-	ConnectorConfigComparer = cmp.Comparer(func(a, b ConnectorConfig) bool {
-		if (a == ConnectorConfig{}) && (b == ConnectorConfig{}) {
-			return true
-		} else if (a != ConnectorConfig{}) && (b != ConnectorConfig{}) {
-			return a.Name == b.Name &&
-				a.ConnectorClass == b.ConnectorClass &&
-				a.DocumentType == b.DocumentType &&
-				a.Topics == b.Topics &&
-				a.TopicIndexMap == b.TopicIndexMap &&
-				a.BatchSize == b.BatchSize &&
-				a.ConnectionURL == b.ConnectionURL &&
-				a.KeyIgnore == b.KeyIgnore &&
-				a.SchemaIgnore == b.SchemaIgnore &&
-				a.BehaviorOnMalformedDocuments == b.BehaviorOnMalformedDocuments &&
-				a.ConnectionUsername == b.ConnectionUsername &&
-				a.ConnectionPassword == b.ConnectionPassword &&
-				a.Type == b.Type &&
-				a.MaxInFlightRequests == b.MaxInFlightRequests &&
-				a.MaxBufferedRecords == b.MaxBufferedRecords &&
-				a.LingerMs == b.LingerMs &&
-				a.FlushTimeoutMs == b.FlushTimeoutMs &&
-				a.MaxRetries == b.MaxRetries &&
-				a.RetryBackoffMs == b.RetryBackoffMs &&
-				a.ConnectionCompression == b.ConnectionCompression &&
-				a.ConnectionTimeoutMs == b.ConnectionTimeoutMs &&
-				a.ReadTimeoutMs == b.ReadTimeoutMs &&
-				a.TasksMax == b.TasksMax &&
-				a.OffsetFlushTimeoutMs == b.OffsetFlushTimeoutMs &&
-				a.HeartbeatIntervalMs == b.HeartbeatIntervalMs &&
-				a.ValueConverterSchemasEnable == b.ValueConverterSchemasEnable &&
-				a.ValueConverter == b.ValueConverter
-
-		}
-		return false
-	})
-}
 
 // ConnectorStatus ...
 type ConnectorStatus struct {
@@ -120,39 +77,8 @@ type Task struct {
 
 // Connector ...
 type Connector struct {
-	Name   string           `json:"name"`
-	Config *ConnectorConfig `json:"config"`
-}
-
-// ConnectorConfig ...
-type ConnectorConfig struct {
-	Name                         string         `json:"name,omitempty" validate:"required,connectorname"`
-	ConnectorClass               string         `json:"connector.class" validate:"required,fqdn"`
-	DocumentType                 string         `json:"type.name" validate:"required,esdoctype"`
-	Topics                       string         `json:"topics" validate:"required,topiclist"`
-	TopicIndexMap                string         `json:"topic.index.map" validate:"required,topicindexmap"`
-	ConnectionURL                string         `json:"connection.url" validate:"required,url"`
-	ConnectionUsername           string         `json:"connection.username,omitempty"`
-	ConnectionPassword           string         `json:"connection.password,omitempty"`
-	KeyIgnore                    types.FlexBool `json:"key.ignore"`
-	SchemaIgnore                 types.FlexBool `json:"schema.ignore"`
-	Type                         string         `json:"type,omitempty" validate:"omitempty,connectorname"`
-	BehaviorOnMalformedDocuments string         `json:"behavior.on.malformed.documents,omitempty"  validate:"required,oneof=ignore fail warn"`
-	BatchSize                    types.FlexInt  `json:"batch.size,omitempty"`
-	MaxInFlightRequests          types.FlexInt  `json:"max.in.flight.requests,omitempty"`
-	MaxBufferedRecords           types.FlexInt  `json:"max.buffered.records,omitempty"`
-	LingerMs                     types.FlexInt  `json:"linger.ms,omitempty"`
-	FlushTimeoutMs               types.FlexInt  `json:"flush.timeout.ms,omitempty"`
-	MaxRetries                   types.FlexInt  `json:"max.retries,omitempty"`
-	RetryBackoffMs               types.FlexInt  `json:"retry.backoff.ms,omitempty"`
-	ConnectionCompression        types.FlexBool `json:"connection.compression"`
-	ConnectionTimeoutMs          types.FlexInt  `json:"connection.timeout.ms,omitempty"`
-	ReadTimeoutMs                types.FlexInt  `json:"read.timeout.ms,omitempty"`
-	TasksMax                     types.FlexInt  `json:"tasks.max,omitempty"`
-	OffsetFlushTimeoutMs         types.FlexInt  `json:"offset.flush.timeout.ms,omitempty"`
-	HeartbeatIntervalMs          types.FlexInt  `json:"heartbeat.interval.ms,omitempty"`
-	ValueConverterSchemasEnable  types.FlexBool `json:"value.converter.schemas.enable"`
-	ValueConverter               string         `json:"value.converter,omitempty" validate:"omitempty,fqdn"`
+	Name   string            `json:"name"`
+	Config map[string]string `json:"config"`
 }
 
 // Response ...
@@ -249,7 +175,7 @@ func (kcc Client) Create(connector Connector) (*Response, error) {
 
 // Read ...
 func (kcc Client) Read(connector string) (*Response, error) {
-	var config ConnectorConfig
+	var config map[string]string
 	var kcError Error
 	if govalidator.IsDNSName(connector) {
 		status, body, err := kcc.httpClient.Get("/connectors/" + connector + "/config")

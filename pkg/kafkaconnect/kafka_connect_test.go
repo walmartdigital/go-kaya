@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/walmartdigital/go-kaya/pkg/client"
@@ -48,7 +47,7 @@ var _ = Describe("Read from Kafka Connect", func() {
 	var (
 		fakeHTTPClient        *mocks.MockHTTPClient
 		fakeHTTPClientFactory *mocks.MockHTTPClientFactory
-		kafkaConnectConfig    kafkaconnect.ConnectorConfig
+		kafkaConnectConfig    map[string]string
 		kafkaConnectClient    *kafkaconnect.Client
 	)
 
@@ -58,16 +57,16 @@ var _ = Describe("Read from Kafka Connect", func() {
 		fakeHTTPClientFactory.EXPECT().Create("http://somehost", client.HTTPClientConfig{}).Return(
 			fakeHTTPClient, nil,
 		).Times(1)
-		kafkaConnectConfig = kafkaconnect.ConnectorConfig{
-			Name:           "logging",
-			ConnectorClass: "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-			DocumentType:   "log",
-			Topics:         "_dumblogger.logs",
-			TopicIndexMap:  "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
-			BatchSize:      100,
-			ConnectionURL:  "http://elasticsearch-master.default.svc.cluster.local:9200",
-			KeyIgnore:      true,
-			SchemaIgnore:   true,
+		kafkaConnectConfig = map[string]string{
+			"name":            "logging",
+			"connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+			"type.name":       "log",
+			"topics":          "_dumblogger.logs",
+			"topic.index.map": "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
+			"batch.size":      "100",
+			"connection.url":  "http://elasticsearch-master.default.svc.cluster.local:9200",
+			"key.ignore":      "true",
+			"schema.ignore":   "true",
 		}
 
 		kafkaConnectClient, _ = kafkaconnect.NewClient("somehost", client.HTTPClientConfig{}, fakeHTTPClientFactory)
@@ -86,7 +85,7 @@ var _ = Describe("Read from Kafka Connect", func() {
 		resp, err2 := kafkaConnectClient.Read("logging")
 		Expect(err2).To(BeNil())
 		Expect(resp.Result).To(BeIdenticalTo("success"))
-		Expect(resp.Payload.(kafkaconnect.ConnectorConfig)).To(Equal(kafkaConnectConfig))
+		Expect(resp.Payload.(map[string]string)).To(Equal(kafkaConnectConfig))
 	})
 
 	It("should get a connector status", func() {
@@ -320,32 +319,33 @@ var _ = Describe("Create Kafka Connect connectors", func() {
 		fakeHTTPClientFactory.EXPECT().Create("http://somehost", client.HTTPClientConfig{}).Return(
 			fakeHTTPClient, nil,
 		).Times(1)
+
 		sourceConnector = kafkaconnect.Connector{
 			Name: "logging",
-			Config: &kafkaconnect.ConnectorConfig{
-				ConnectorClass: "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-				DocumentType:   "log",
-				Topics:         "_dumblogger.logs",
-				TopicIndexMap:  "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
-				BatchSize:      100,
-				ConnectionURL:  "http://elasticsearch-master.default.svc.cluster.local:9200",
-				KeyIgnore:      true,
-				SchemaIgnore:   true,
+			Config: map[string]string{
+				"connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+				"type.name":       "log",
+				"topics":          "_dumblogger.logs",
+				"topic.index.map": "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
+				"batch.size":      "100",
+				"connection.url":  "http://elasticsearch-master.default.svc.cluster.local:9200",
+				"key.ignore":      "true",
+				"schema.ignore":   "true",
 			},
 		}
 
 		resultConnector = kafkaconnect.Connector{
 			Name: "logging",
-			Config: &kafkaconnect.ConnectorConfig{
-				ConnectorClass: "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-				DocumentType:   "log",
-				Topics:         "_dumblogger.logs",
-				TopicIndexMap:  "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
-				BatchSize:      100,
-				ConnectionURL:  "http://elasticsearch-master.default.svc.cluster.local:9200",
-				KeyIgnore:      true,
-				SchemaIgnore:   true,
-				Type:           "sink",
+			Config: map[string]string{
+				"connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+				"type.name":       "log",
+				"topics":          "_dumblogger.logs",
+				"topic.index.map": "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
+				"batch.size":      "100",
+				"connection.url":  "http://elasticsearch-master.default.svc.cluster.local:9200",
+				"key.ignore":      "true",
+				"schema.ignore":   "true",
+				"type":            "sink",
 			},
 		}
 
@@ -404,29 +404,29 @@ var _ = Describe("Update Kafka Connect connectors", func() {
 		).Times(1)
 		sourceConnector = kafkaconnect.Connector{
 			Name: "logging",
-			Config: &kafkaconnect.ConnectorConfig{
-				ConnectorClass: "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-				DocumentType:   "log",
-				Topics:         "_dumblogger.logs",
-				TopicIndexMap:  "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
-				BatchSize:      100,
-				ConnectionURL:  "http://elasticsearch-master.default.svc.cluster.local:9200",
-				KeyIgnore:      true,
-				SchemaIgnore:   true,
+			Config: map[string]string{
+				"connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+				"type.name":       "log",
+				"topics":          "_dumblogger.logs",
+				"topic.index.map": "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
+				"batch.size":      "100",
+				"connection.url":  "http://elasticsearch-master.default.svc.cluster.local:9200",
+				"key.ignore":      "true",
+				"schema.ignore":   "true",
 			},
 		}
 		resultConnector = kafkaconnect.Connector{
 			Name: "logging",
-			Config: &kafkaconnect.ConnectorConfig{
-				ConnectorClass: "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-				DocumentType:   "log",
-				Topics:         "_dumblogger.logs",
-				TopicIndexMap:  "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
-				BatchSize:      100,
-				ConnectionURL:  "http://elasticsearch-master.default.svc.cluster.local:9200",
-				KeyIgnore:      true,
-				SchemaIgnore:   true,
-				Type:           "sink",
+			Config: map[string]string{
+				"connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+				"type.name":       "log",
+				"topics":          "_dumblogger.logs",
+				"topic.index.map": "_dumblogger.logs:<logs-pd-dumblogger-{now/d}>",
+				"batch.size":      "100",
+				"connection.url":  "http://elasticsearch-master.default.svc.cluster.local:9200",
+				"key.ignore":      "true",
+				"schema.ignore":   "true",
+				"type":            "sink",
 			},
 		}
 		kafkaConnectClient, _ = kafkaconnect.NewClient("somehost", client.HTTPClientConfig{}, fakeHTTPClientFactory)
@@ -517,136 +517,5 @@ var _ = Describe("Delete Kafka Connect connectors", func() {
 		resp, err2 := kafkaConnectClient.Delete("logging")
 		Expect(err2).NotTo(BeNil())
 		Expect(resp.Result).To(BeIdenticalTo("error"))
-	})
-
-	It("should determine the two provided ConnectorConfig objects are equal", func() {
-		a := kafkaconnect.ConnectorConfig{
-			Name:                         "Hello",
-			ConnectorClass:               "World",
-			DocumentType:                 "log",
-			Topics:                       "_skynet.logs",
-			TopicIndexMap:                "_skynet.logs:<logs-pd-skynet-{now/d}>",
-			ConnectionURL:                "http://elasticsearch:9200",
-			ConnectionUsername:           "john",
-			ConnectionPassword:           "doe",
-			KeyIgnore:                    true,
-			SchemaIgnore:                 true,
-			Type:                         "sometype",
-			BehaviorOnMalformedDocuments: "ignore",
-			BatchSize:                    100,
-			MaxInFlightRequests:          5,
-			MaxBufferedRecords:           100,
-			LingerMs:                     1,
-			FlushTimeoutMs:               10,
-			MaxRetries:                   3,
-			RetryBackoffMs:               3,
-			ConnectionCompression:        false,
-			ConnectionTimeoutMs:          5,
-			ReadTimeoutMs:                5,
-			TasksMax:                     5,
-			OffsetFlushTimeoutMs:         8000,
-			HeartbeatIntervalMs:          1000,
-			ValueConverterSchemasEnable:  false,
-			ValueConverter:               "org.apache.kafka.connect.json.JsonConverter",
-		}
-
-		b := kafkaconnect.ConnectorConfig{
-			Name:                         "Hello",
-			ConnectorClass:               "World",
-			DocumentType:                 "log",
-			Topics:                       "_skynet.logs",
-			TopicIndexMap:                "_skynet.logs:<logs-pd-skynet-{now/d}>",
-			ConnectionURL:                "http://elasticsearch:9200",
-			ConnectionUsername:           "john",
-			ConnectionPassword:           "doe",
-			KeyIgnore:                    true,
-			SchemaIgnore:                 true,
-			Type:                         "sometype",
-			BehaviorOnMalformedDocuments: "ignore",
-			BatchSize:                    100,
-			MaxInFlightRequests:          5,
-			MaxBufferedRecords:           100,
-			LingerMs:                     1,
-			FlushTimeoutMs:               10,
-			MaxRetries:                   3,
-			RetryBackoffMs:               3,
-			ConnectionCompression:        false,
-			ConnectionTimeoutMs:          5,
-			ReadTimeoutMs:                5,
-			TasksMax:                     5,
-			OffsetFlushTimeoutMs:         8000,
-			HeartbeatIntervalMs:          1000,
-			ValueConverterSchemasEnable:  false,
-			ValueConverter:               "org.apache.kafka.connect.json.JsonConverter",
-		}
-
-		result := cmp.Equal(a, b, kafkaconnect.ConnectorConfigComparer)
-
-		Expect(result).To(Equal(true))
-	})
-
-	It("should determine the two provided ConnectorConfig objects are equal", func() {
-		a := kafkaconnect.ConnectorConfig{
-			Name:                         "Hello",
-			ConnectorClass:               "World",
-			DocumentType:                 "log",
-			Topics:                       "_skynet.logs",
-			TopicIndexMap:                "_skynet.logs:<logs-pd-skynet-{now/d}>",
-			BatchSize:                    100,
-			ConnectionURL:                "http://elasticsearch:9200",
-			KeyIgnore:                    true,
-			SchemaIgnore:                 true,
-			BehaviorOnMalformedDocuments: "ignore",
-			ConnectionUsername:           "john",
-			ConnectionPassword:           "doe",
-			Type:                         "sometype",
-			MaxInFlightRequests:          5,
-			MaxBufferedRecords:           100,
-			LingerMs:                     1,
-			FlushTimeoutMs:               10,
-			MaxRetries:                   3,
-			RetryBackoffMs:               3,
-			ConnectionCompression:        false,
-			ConnectionTimeoutMs:          5,
-			ReadTimeoutMs:                5,
-			TasksMax:                     5,
-			OffsetFlushTimeoutMs:         8000,
-			HeartbeatIntervalMs:          1000,
-			ValueConverterSchemasEnable:  false,
-			ValueConverter:               "org.apache.kafka.connect.json.JsonConverter",
-		}
-
-		b := kafkaconnect.ConnectorConfig{
-			Name:                         "Hello",
-			ConnectorClass:               "World",
-			DocumentType:                 "log",
-			Topics:                       "_skynet.logs",
-			TopicIndexMap:                "_skynet.logs:<logs-pd-skynet-{now/d}>",
-			BatchSize:                    100,
-			ConnectionURL:                "http://elasticsearch:9200",
-			KeyIgnore:                    true,
-			SchemaIgnore:                 true,
-			BehaviorOnMalformedDocuments: "ignore",
-			ConnectionUsername:           "bob",
-			ConnectionPassword:           "doe",
-			Type:                         "sometype",
-			MaxInFlightRequests:          6,
-			MaxBufferedRecords:           101,
-			LingerMs:                     2,
-			FlushTimeoutMs:               12,
-			MaxRetries:                   4,
-			RetryBackoffMs:               6,
-			ConnectionCompression:        false,
-			ConnectionTimeoutMs:          6,
-			ReadTimeoutMs:                87,
-			TasksMax:                     5,
-			OffsetFlushTimeoutMs:         8000,
-			HeartbeatIntervalMs:          1000,
-			ValueConverterSchemasEnable:  false,
-			ValueConverter:               "org.apache.kafka.connect.json.JsonConverter",
-		}
-
-		result := cmp.Equal(a, b, kafkaconnect.ConnectorConfigComparer)
-		Expect(result).To(Equal(false))
 	})
 })
