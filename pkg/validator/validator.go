@@ -58,6 +58,15 @@ type Validator struct {
 	validator *validator.Validate
 }
 
+// ValidateMap ...
+func (v *Validator) ValidateMap(input map[string]string) (bool, error) {
+	err := v.validator.Var(input, "connectorconfigmap")
+	if err != nil {
+		return false, v.LastError
+	}
+	return true, nil
+}
+
 // New ...
 func New() *Validator {
 	var err error
