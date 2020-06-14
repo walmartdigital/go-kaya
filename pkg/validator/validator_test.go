@@ -20,17 +20,60 @@ var _ = Describe("Validator tests", func() {
 
 	BeforeEach(func() {
 		v = validator.New()
+		_ = v
 	})
 
-	It("should return an error due to an invalid configuration", func() {
-		config := map[string]string{}{
-			"key":             "yesvsdvsdfvdfvafadsca",
-			"key2":            "anyway1234",
+	It("should validate successfully due to a valid configuration", func() {
+		config := map[string]string{
+			"name":            "amida.logging",
+			"connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+			"topic.index.map": "dumblogger-logs<logs-pd-dumblogger-{now/d}>,_ims.logs:<logs-pd-ims-{now/d}>,_amida.logs:<logs-pd-amida-{now/d}>,_osiris.logs:<logs-pd-osiris-{now/d}>,_midas.logs:<logs-pd-midas-{now/d}>,_kimun.logs:<logs-pd-kimun-{now/d}>",
+		}
+		ok, err := v.ValidateMap(config)
+		Expect(ok).To(Equal(true))
+		Expect(err).To(BeNil())
+	})
+
+	It("should fail validation due to an invalid connector name", func() {
+		config := map[string]string{
+			"name":            "amida.logging$%&/(",
+			"connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
 			"topic.index.map": "dumblogger-logs<logs-pd-dumblogger-{now/d}>,_ims.logs:<logs-pd-ims-{now/d}>,_amida.logs:<logs-pd-amida-{now/d}>,_osiris.logs:<logs-pd-osiris-{now/d}>,_midas.logs:<logs-pd-midas-{now/d}>,_kimun.logs:<logs-pd-kimun-{now/d}>",
 		}
 		ok, err := v.ValidateMap(config)
 		Expect(ok).To(Equal(false))
 		Expect(err).NotTo(BeNil())
 	})
-})
 
+	It("should fail validation due to a missing connector name", func() {
+		config := map[string]string{
+			"connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+			"topic.index.map": "dumblogger-logs<logs-pd-dumblogger-{now/d}>,_ims.logs:<logs-pd-ims-{now/d}>,_amida.logs:<logs-pd-amida-{now/d}>,_osiris.logs:<logs-pd-osiris-{now/d}>,_midas.logs:<logs-pd-midas-{now/d}>,_kimun.logs:<logs-pd-kimun-{now/d}>",
+		}
+		ok, err := v.ValidateMap(config)
+		Expect(ok).To(Equal(false))
+		Expect(err).NotTo(BeNil())
+	})
+
+	It("should fail validation due to an invalid connector class", func() {
+		config := map[string]string{
+			"name":            "amida.logging$%&/(",
+			"connector.class": "io.confluent.connect.elasticsearch.%/$(",
+			"topic.index.map": "dumblogger-logs<logs-pd-dumblogger-{now/d}>,_ims.logs:<logs-pd-ims-{now/d}>,_amida.logs:<logs-pd-amida-{now/d}>,_osiris.logs:<logs-pd-osiris-{now/d}>,_midas.logs:<logs-pd-midas-{now/d}>,_kimun.logs:<logs-pd-kimun-{now/d}>",
+		}
+		ok, err := v.ValidateMap(config)
+		Expect(ok).To(Equal(false))
+		Expect(err).NotTo(BeNil())
+	})
+
+	It("should fail validation due to a missing connector class", func() {
+		config := map[string]string{
+			"name":            "amida.logging",
+			"topic.index.map": "dumblogger-logs<logs-pd-dumblogger-{now/d}>,_ims.logs:<logs-pd-ims-{now/d}>,_amida.logs:<logs-pd-amida-{now/d}>,_osiris.logs:<logs-pd-osiris-{now/d}>,_midas.logs:<logs-pd-midas-{now/d}>,_kimun.logs:<logs-pd-kimun-{now/d}>",
+		}
+		ok, err := v.ValidateMap(config)
+		Expect(ok).To(Equal(false))
+		Expect(err).NotTo(BeNil())
+	})
+
+})

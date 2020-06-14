@@ -118,7 +118,7 @@ func New() *Validator {
 	}
 
 	err = v.RegisterValidation("connectorconfigmap", func(fl validator.FieldLevel) bool {
-		m, ok := fl.Field().Interface().(map[string]interface{})
+		m, ok := fl.Field().Interface().(map[string]string)
 		if !ok {
 			instance.LastError = fmt.Errorf("Not map[string]string")
 			return false
@@ -126,7 +126,7 @@ func New() *Validator {
 
 		for k, val := range validationMap {
 			if v.Var(m[k], val) != nil {
-				instance.LastError = fmt.Errorf("Field %s failed validation", k)
+				instance.LastError = fmt.Errorf("Field '%s' failed validation", k)
 				return false
 			}
 		}
