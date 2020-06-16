@@ -176,10 +176,15 @@ func (kcc Client) Create(connector Connector) (*Response, error) {
 // Read ...
 func (kcc Client) Read(connector string) (*Response, error) {
 	var config map[string]string
-	var kcError Error
 	if govalidator.IsDNSName(connector) {
 		status, body, err := kcc.httpClient.Get("/connectors/" + connector + "/config")
-		if status == 200 {
+
+		if err != nil {
+			return &Response{Result: "error"}, fmt.Errorf("Error executing Read on Kafka Connect: %s", err.Error())
+		}
+
+		switch status {
+		case 200:
 			err := json.Unmarshal(*body, &config)
 			if err == nil {
 				response := new(Response)
@@ -188,35 +193,67 @@ func (kcc Client) Read(connector string) (*Response, error) {
 				return response, nil
 			}
 			return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
+		default:
+			return HandleNonOKResponse(status, body)
 		}
-		if err != nil {
-			return &Response{Result: "error"}, fmt.Errorf("Error executing Read on Kafka Connect: %s", err.Error())
-		}
-		err = json.Unmarshal(*body, &kcError)
-		if err == nil {
-			response := new(Response)
-			response.Result = "notfound"
-			return response, fmt.Errorf("Received error from Kafka Connect (code:'%d', message:'%s')", kcError.ErrorCode, kcError.Message)
-		}
-		return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
 	}
 	return nil, errors.New("Malformed connector name")
 }
 
+// HandleNonOKResponse manages any non HTTP 200 response code and conveys the corresponding
+// error to the caller. Returns a response type 'unspecified' if the response code is
+// specifically handled.
+func HandleNonOKResponse(status int, body *[]byte) (*Response, error) {
+	var kcError Error
+	err := json.Unmarshal(*body, &kcError)
+
+	if err != nil {
+		return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
+	}
+
+	response := new(Response)
+	switch status {
+	case 404:
+		response.Result = "notfound"
+		return response, fmt.Errorf("Non HTTP 200 response (code:'%d', message:'%s')", kcError.ErrorCode, kcError.Message)
+	case 409:
+		response := new(Response)
+		response.Result = "conflict"
+		return response, fmt.Errorf("Non HTTP 200 response (code:'%d', message:'%s')", kcError.ErrorCode, kcError.Message)
+	default:
+		response := new(Response)
+		response.Result = "unspecified"
+		return response, fmt.Errorf("Received unhandled HTTP response (code:'%d', message:'%s')", kcError.ErrorCode, kcError.Message)
+	}
+}
+
 // Update ...
 func (kcc Client) Update(connector Connector) (*Response, error) {
-	var kcError Error
 	if govalidator.IsDNSName(connector.Name) {
 		status, body, err := kcc.httpClient.Get("/connectors/" + connector.Name)
-		if status != 200 {
-			return &Response{Result: "error"}, errors.New("Cannot update connector as it does not exist")
+
+		if err != nil {
+			return &Response{Result: "error"}, fmt.Errorf("Error executing Update on Kafka Connect: %s", err.Error())
 		}
+
+		if status != 200 {
+			return HandleNonOKResponse(status, body)
+		}
+
 		configBytes, err := json.Marshal(connector.Config)
+
 		if err != nil {
 			return &Response{Result: "error"}, errors.New("Failed to serialize connector configuration")
 		}
+
 		status, body, err = kcc.httpClient.Put("/connectors/"+connector.Name+"/config", configBytes)
-		if status == 200 {
+
+		if err != nil {
+			return &Response{Result: "error"}, fmt.Errorf("Error executing Update on Kafka Connect: %s", err.Error())
+		}
+
+		switch status {
+		case 200:
 			var connector Connector
 			err := json.Unmarshal(*body, &connector)
 			if err == nil {
@@ -226,17 +263,9 @@ func (kcc Client) Update(connector Connector) (*Response, error) {
 				return response, nil
 			}
 			return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
+		default:
+			return HandleNonOKResponse(status, body)
 		}
-		if err != nil {
-			return &Response{Result: "error"}, fmt.Errorf("Error executing Update on Kafka Connect: %s", err.Error())
-		}
-		err = json.Unmarshal(*body, &kcError)
-		if err == nil {
-			response := new(Response)
-			response.Result = "error"
-			return response, fmt.Errorf("Received error from Kafka Connect (code:'%d', message:'%s')", kcError.ErrorCode, kcError.Message)
-		}
-		return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
 	}
 	return nil, errors.New("Malformed connector name")
 }

@@ -469,7 +469,36 @@ var _ = Describe("Update Kafka Connect connectors", func() {
 
 		resp, err2 := kafkaConnectClient.Update(sourceConnector)
 		Expect(err2).NotTo(BeNil())
-		Expect(resp.Result).To(BeIdenticalTo("error"))
+		Expect(resp.Result).To(BeIdenticalTo("notfound"))
+	})
+
+	It("should not update a connector because Kafka Connect returns a conflict", func() {
+		statusCode := 409
+		kafkaConnectError := kafkaconnect.Error{ErrorCode: 409, Message: "Conflict"}
+		responseBody, _ := json.Marshal(kafkaConnectError)
+
+		emptymapbytes, _ := json.Marshal(map[string]string{})
+
+		fakeHTTPClient.EXPECT().Get("/connectors/logging").Return(
+			200,
+			&[]byte{},
+			nil,
+		).Times(1)
+
+		fakeHTTPClient.EXPECT().Put("/connectors/logging/config", emptymapbytes).Return(
+			statusCode,
+			&responseBody,
+			nil,
+		).Times(1)
+
+		emptyConnector := kafkaconnect.Connector{
+			Name:   "logging",
+			Config: map[string]string{},
+		}
+
+		resp, err2 := kafkaConnectClient.Update(emptyConnector)
+		Expect(err2).NotTo(BeNil())
+		Expect(resp.Result).To(BeIdenticalTo("conflict"))
 	})
 })
 
