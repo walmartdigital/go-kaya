@@ -142,8 +142,12 @@ func NewClient(kcHost string, config client.HTTPClientConfig, hcf client.HTTPCli
 // error to the caller. Returns a response type 'unspecified' if the response code is
 // specifically handled.
 func HandleNonOKResponse(status int, body *[]byte) (*Response, error) {
+	var err error
 	var kcError Error
-	err := json.Unmarshal(*body, &kcError)
+
+	if body != nil {
+		err = json.Unmarshal(*body, &kcError)
+	}
 
 	if err != nil {
 		return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
@@ -272,35 +276,37 @@ func (kcc Client) Update(connector Connector) (*Response, error) {
 
 // Delete ...
 func (kcc Client) Delete(connector string) (*Response, error) {
-	var kcError Error
 	if govalidator.IsDNSName(connector) {
 		status, body, err := kcc.httpClient.Delete("/connectors/" + connector)
-		if status == 204 {
-			response := new(Response)
-			response.Result = "success"
-			return response, nil
-		}
+
 		if err != nil {
 			return &Response{Result: "error"}, fmt.Errorf("Error executing Delete on Kafka Connect: %s", err.Error())
 		}
-		err = json.Unmarshal(*body, &kcError)
-		if err == nil {
+
+		switch status {
+		case 204:
 			response := new(Response)
-			response.Result = "error"
-			return response, fmt.Errorf("Received error from Kafka Connect (code:'%d', message:'%s')", kcError.ErrorCode, kcError.Message)
+			response.Result = "success"
+			return response, nil
+		default:
+			return HandleNonOKResponse(status, body)
 		}
-		return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
 	}
 	return nil, errors.New("Malformed connector name")
 }
 
 // GetStatus ...
 func (kcc Client) GetStatus(connector string) (*Response, error) {
-	var kcError Error
 	var connectorStatus Status
 	if govalidator.IsDNSName(connector) {
 		status, body, err := kcc.httpClient.Get("/connectors/" + connector + "/status")
-		if status == 200 {
+
+		if err != nil {
+			return &Response{Result: "error"}, fmt.Errorf("Error executing GetStatus on Kafka Connect: %s", err.Error())
+		}
+
+		switch status {
+		case 200:
 			err := json.Unmarshal(*body, &connectorStatus)
 			if err == nil {
 				response := new(Response)
@@ -309,17 +315,9 @@ func (kcc Client) GetStatus(connector string) (*Response, error) {
 				return response, nil
 			}
 			return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
+		default:
+			return HandleNonOKResponse(status, body)
 		}
-		if err != nil {
-			return &Response{Result: "error"}, fmt.Errorf("Error executing Status on Kafka Connect: %s", err.Error())
-		}
-		err = json.Unmarshal(*body, &kcError)
-		if err == nil {
-			response := new(Response)
-			response.Result = "error"
-			return response, fmt.Errorf("Received error from Kafka Connect (code:'%d', message:'%s')", kcError.ErrorCode, kcError.Message)
-		}
-		return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
 	}
 	return nil, errors.New("Malformed connector name")
 }
@@ -328,16 +326,20 @@ func (kcc Client) GetStatus(connector string) (*Response, error) {
 func (kcc Client) RestartTask(connector string, taskID int) (*Response, error) {
 	if govalidator.IsDNSName(connector) {
 		endpoint := fmt.Sprintf("/connectors/%s/tasks/%d/restart", connector, taskID)
-		status, _, err := kcc.httpClient.Post(endpoint, []byte{})
+		status, body, err := kcc.httpClient.Post(endpoint, []byte{})
 
-		if status == 204 {
+		if err != nil {
+			return &Response{Result: "error"}, fmt.Errorf("Error executing RestartTask on Kafka Connect: %s", err.Error())
+		}
+
+		switch status {
+		case 204:
 			response := new(Response)
 			response.Result = "success"
 			return response, nil
+		default:
+			return HandleNonOKResponse(status, body)
 		}
-		response := new(Response)
-		response.Result = "error"
-		return response, err
 	}
 	return nil, errors.New("Malformed connector name")
 }
@@ -346,16 +348,20 @@ func (kcc Client) RestartTask(connector string, taskID int) (*Response, error) {
 func (kcc Client) RestartConnector(connector string) (*Response, error) {
 	if govalidator.IsDNSName(connector) {
 		endpoint := fmt.Sprintf("/connectors/%s/restart", connector)
-		status, _, err := kcc.httpClient.Post(endpoint, []byte{})
+		status, body, err := kcc.httpClient.Post(endpoint, []byte{})
 
-		if status == 204 {
+		if err != nil {
+			return &Response{Result: "error"}, fmt.Errorf("Error executing RestartConnector on Kafka Connect: %s", err.Error())
+		}
+
+		switch status {
+		case 204:
 			response := new(Response)
 			response.Result = "success"
 			return response, nil
+		default:
+			return HandleNonOKResponse(status, body)
 		}
-		response := new(Response)
-		response.Result = "error"
-		return response, err
 	}
 	return nil, errors.New("Malformed connector name")
 }

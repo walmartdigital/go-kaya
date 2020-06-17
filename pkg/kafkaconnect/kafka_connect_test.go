@@ -545,6 +545,6 @@ var _ = Describe("Delete Kafka Connect connectors", func() {
 
 		resp, err2 := kafkaConnectClient.Delete("logging")
 		Expect(err2).NotTo(BeNil())
-		Expect(resp.Result).To(BeIdenticalTo("error"))
+		Expect(resp.Result).To(BeIdenticalTo("notfound"))
 	})
 })
