@@ -383,7 +383,7 @@ var _ = Describe("Create Kafka Connect connectors", func() {
 
 		resp, err2 := kafkaConnectClient.Create(sourceConnector)
 		Expect(err2).NotTo(BeNil())
-		Expect(resp.Result).To(BeIdenticalTo("error"))
+		Expect(resp.Result).To(BeIdenticalTo("conflict"))
 	})
 })
 

@@ -138,68 +138,6 @@ func NewClient(kcHost string, config client.HTTPClientConfig, hcf client.HTTPCli
 	return k, nil
 }
 
-// Create ...
-func (kcc Client) Create(connector Connector) (*Response, error) {
-	var kcError Error
-	if govalidator.IsDNSName(connector.Name) {
-		configBytes, err := json.Marshal(connector)
-		if err != nil {
-			return &Response{Result: "error"}, errors.New("Failed to serialize connector configuration")
-		}
-
-		status, body, err := kcc.httpClient.Post("/connectors", configBytes)
-		if status == 201 {
-			var createdConnector Connector
-			err := json.Unmarshal(*body, &createdConnector)
-			if err == nil {
-				response := new(Response)
-				response.Result = "success"
-				response.Payload = createdConnector
-				return response, nil
-			}
-			return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
-		}
-		if err != nil {
-			return &Response{Result: "error"}, fmt.Errorf("Error executing Create on Kafka Connect: %s", err.Error())
-		}
-		err = json.Unmarshal(*body, &kcError)
-		if err == nil {
-			response := new(Response)
-			response.Result = "error"
-			return response, fmt.Errorf("Received error from Kafka Connect (code:'%d', message:'%s')", kcError.ErrorCode, kcError.Message)
-		}
-		return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
-	}
-	return nil, errors.New("Malformed connector name")
-}
-
-// Read ...
-func (kcc Client) Read(connector string) (*Response, error) {
-	var config map[string]string
-	if govalidator.IsDNSName(connector) {
-		status, body, err := kcc.httpClient.Get("/connectors/" + connector + "/config")
-
-		if err != nil {
-			return &Response{Result: "error"}, fmt.Errorf("Error executing Read on Kafka Connect: %s", err.Error())
-		}
-
-		switch status {
-		case 200:
-			err := json.Unmarshal(*body, &config)
-			if err == nil {
-				response := new(Response)
-				response.Result = "success"
-				response.Payload = config
-				return response, nil
-			}
-			return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
-		default:
-			return HandleNonOKResponse(status, body)
-		}
-	}
-	return nil, errors.New("Malformed connector name")
-}
-
 // HandleNonOKResponse manages any non HTTP 200 response code and conveys the corresponding
 // error to the caller. Returns a response type 'unspecified' if the response code is
 // specifically handled.
@@ -227,7 +165,69 @@ func HandleNonOKResponse(status int, body *[]byte) (*Response, error) {
 	}
 }
 
-// Update ...
+// Create ...
+func (kcc Client) Create(connector Connector) (*Response, error) {
+	if govalidator.IsDNSName(connector.Name) {
+		configBytes, err := json.Marshal(connector)
+		if err != nil {
+			return &Response{Result: "error"}, errors.New("Failed to serialize connector configuration")
+		}
+
+		status, body, err := kcc.httpClient.Post("/connectors", configBytes)
+
+		if err != nil {
+			return &Response{Result: "error"}, fmt.Errorf("Error executing Create on Kafka Connect: %s", err.Error())
+		}
+
+		switch status {
+		case 201:
+			var createdConnector Connector
+			err := json.Unmarshal(*body, &createdConnector)
+			if err == nil {
+				response := new(Response)
+				response.Result = "success"
+				response.Payload = createdConnector
+				return response, nil
+			}
+			return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
+		default:
+			return HandleNonOKResponse(status, body)
+		}
+	}
+	return nil, errors.New("Malformed connector name")
+}
+
+// Read gets a connector configuration from KafkaConnect. The returned payload contains
+// contains the configuration of the connector.
+func (kcc Client) Read(connector string) (*Response, error) {
+	var config map[string]string
+	if govalidator.IsDNSName(connector) {
+		status, body, err := kcc.httpClient.Get("/connectors/" + connector + "/config")
+
+		if err != nil {
+			return &Response{Result: "error"}, fmt.Errorf("Error executing Read on Kafka Connect: %s", err.Error())
+		}
+
+		switch status {
+		case 200:
+			err := json.Unmarshal(*body, &config)
+			if err == nil {
+				response := new(Response)
+				response.Result = "success"
+				response.Payload = config
+				return response, nil
+			}
+			return &Response{Result: "error"}, errors.New("Failed to deserialize Kafka Connect response")
+		default:
+			return HandleNonOKResponse(status, body)
+		}
+	}
+	return nil, errors.New("Malformed connector name")
+}
+
+// Update updates an existing connector's configuration. Due to Kadfka Connect's behavior, which
+// creates a connector if the connector does not exist, the function sends a GET first in order
+// to determine whether the connector already exists or not.
 func (kcc Client) Update(connector Connector) (*Response, error) {
 	if govalidator.IsDNSName(connector.Name) {
 		status, body, err := kcc.httpClient.Get("/connectors/" + connector.Name)
